@@ -22,7 +22,7 @@ class GetCommand extends AbstractCommand
   protected function configure()
   {
     $this
-      ->setName('zabbix:trigger:get')
+      ->setName('trigger:get')
       ->addArgument('host', InputArgument::REQUIRED, 'Host to check')
       ->addOption('triggerid', 't', InputOption::VALUE_REQUIRED, 'Specify Trigger id', null)
       ->addOption('warning', 'w', InputOption::VALUE_REQUIRED, "", 1)

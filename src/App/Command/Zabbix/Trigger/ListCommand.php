@@ -22,7 +22,7 @@ class ListCommand extends AbstractCommand
   protected function configure()
   {
     $this
-      ->setName('zabbix:trigger:list')
+      ->setName('trigger:list')
       ->addArgument('host', InputArgument::REQUIRED, 'Host to check')
       ->addOption('all', 'a', InputOption::VALUE_NONE, 'Show all triggers, disabled and enabled')
     ;
