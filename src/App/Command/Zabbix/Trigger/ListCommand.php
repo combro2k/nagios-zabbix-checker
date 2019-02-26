@@ -53,7 +53,7 @@ class ListCommand extends AbstractCommand
     ]);
 
     foreach ($hosts as $host) {
-      $output->writeln("<red>ID</red>: {$host['triggerid']}; {$host['description']}; Disabled: {$host['status']}");
+      $output->writeln("ID: {$host['triggerid']}; {$host['description']}; Disabled: {$host['status']}");
     }
 
     return 0;
