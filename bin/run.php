@@ -1,8 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-use Zend\ServiceManager\ServiceManager;
-use Symfony\Component\Console\Application;
+use \Zend\ServiceManager\ServiceManager;
+use \Symfony\Component\Console\Application;
 
 require __DIR__ . '/../vendor/autoload.php';
 

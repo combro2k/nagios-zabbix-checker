@@ -1,5 +1,5 @@
 {
-  "name": "mma/smsphp",
+  "name": "mma/zabbix-triggers",
 
   "require": {
     "zendframework/zend-servicemanager": "~3.4",
@@ -17,6 +17,8 @@
       "email": "git@vmaurik.nl"
     }
   ],
+
+  "bin": "bin/run.php",
 
   "autoload": {
     "psr-4": {

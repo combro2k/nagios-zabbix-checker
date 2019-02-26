@@ -1,5 +1,5 @@
 <?php
-namespace App\Command\Zabbix;
+namespace App\Command\Zabbix\Trigger;
 
 use App\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,7 +14,7 @@ use kamermans\ZabbixClient\ZabbixClient;
  *
  * @package App\Command
  */
-class TriggerCommand extends AbstractCommand
+class GetCommand extends AbstractCommand
 {
   /**
    * @return void
@@ -22,10 +22,11 @@ class TriggerCommand extends AbstractCommand
   protected function configure()
   {
     $this
-      ->setName('zabbix:trigger')
-      ->addArgument('host', InputArgument::REQUIRED, "Host to check")
-      ->addOption('triggerid', 't', InputOption::VALUE_REQUIRED, "Specify Trigger id", null)
-      ->addOption('all', 'a', InputOption::VALUE_NONE, "Show all triggers for host")
+      ->setName('zabbix:trigger:get')
+      ->addArgument('host', InputArgument::REQUIRED, 'Host to check')
+      ->addOption('triggerid', 't', InputOption::VALUE_REQUIRED, 'Specify Trigger id', null)
+      ->addOption('warning', 'w', InputOption::VALUE_REQUIRED, "", 1)
+      ->addOption('critical', 'c', InputOption::VALUE_REQUIRED, "", 2)
     ;
   }
 
@@ -50,7 +51,8 @@ class TriggerCommand extends AbstractCommand
       'filter' => [
         'triggerid' => $input->getOption('triggerid'),
         'host' => $input->getArgument('host'),
-        'status' => $input->getOption('all') ? null : 0,
+        'status' => 0,
+        'value' => null,
       ]
     ]);
 
@@ -58,16 +60,17 @@ class TriggerCommand extends AbstractCommand
     $exitCode = 0;
 
     foreach ($hosts as $host) {
-      $output->writeln("ID: {$host['triggerid']}; Description: {$host['description']}; Status: {$host['status']}; Value: {$host['value']}");
-
       if ($host['value'] > 0) {
+        $output->writeln("{$host['description']}; Value: {$host['value']}");
+
         $errors++;
-        $exitCode = 1;
       }
     }
 
-    if ($errors > 1) {
+    if ($errors >= $input->getOption('critical')) {
       $exitCode = 2;
+    } elseif ($errors >= $input->getOption('warning')) {
+      $exitCode = 1;
     }
 
     return (int) $exitCode;

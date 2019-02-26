@@ -1,13 +1,22 @@
 <?php
 use Zend\ServiceManager\ServiceManager;
-use App\Command\Zabbix\TriggerCommand;
+
+use App\Command\Zabbix\Trigger\ListCommand as ListTriggerCommand;
+use App\Command\Zabbix\Trigger\GetCommand as GetTriggerCommand;
+
 use Symfony\Component\Yaml\Yaml;
 
 return [
   'factories' => [
-    TriggerCommand::class => function (ServiceManager $serviceManager) {
-      return new TriggerCommand($serviceManager);
+
+    ListTriggerCommand::class => function (ServiceManager $serviceManager) {
+      return new ListTriggerCommand($serviceManager);
     },
+
+    GetTriggerCommand::class => function (ServiceManager $serviceManager) {
+      return new GetTriggerCommand($serviceManager);
+    },
+
     Yaml::class => function (ServiceManager $serviceManager) {
       $configFile = '/etc/zabbix-triggers.yaml';
       $altConfigFile = __DIR__ . '/../config/parameters.yaml';
@@ -23,5 +32,6 @@ return [
 
       return Yaml::parseFile(sprintf('%s.dist', $altConfigFile));
     }
+
   ],
 ];
