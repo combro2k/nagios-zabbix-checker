@@ -25,8 +25,8 @@ class GetCommand extends AbstractCommand
       ->setName('trigger:get')
       ->addArgument('host', InputArgument::REQUIRED, 'Host to check')
       ->addOption('triggerid', 't', InputOption::VALUE_REQUIRED, 'Specify Trigger id', null)
-      ->addOption('warning', 'w', InputOption::VALUE_REQUIRED, "", 1)
-      ->addOption('critical', 'c', InputOption::VALUE_REQUIRED, "", 2)
+      ->addOption('warning', 'w', InputOption::VALUE_REQUIRED, 'Set warning threshold', 1)
+      ->addOption('critical', 'c', InputOption::VALUE_REQUIRED, 'Set critical threshold', 2)
     ;
   }
 
@@ -59,18 +59,29 @@ class GetCommand extends AbstractCommand
     $errors = 0;
     $exitCode = 0;
 
+    $out = '';
     foreach ($hosts as $host) {
       if ($host['value'] > 0) {
-        $output->writeln("{$host['description']}; Value: {$host['value']}");
-
         $errors++;
       }
+
+      $out .= "{$host['description']} - STATUS: {$host['value']}; ";
     }
 
     if ($errors >= $input->getOption('critical')) {
+      $out = "CRITICAL: {$out}";
+
       $exitCode = 2;
     } elseif ($errors >= $input->getOption('warning')) {
+      $out = "WARNING: {$out}";
+
       $exitCode = 1;
+    } else {
+      $out = "OK: {$out}";
+    }
+
+    if (!empty($out)) {
+      $output->writeln($out);
     }
 
     return (int) $exitCode;
