@@ -15,8 +15,7 @@
 
     "files": [
       "vendor/composer/installed.json",
-      "config/parameters.yaml.dist",
-      "config/parameters.yaml"
+      "config/parameters.yaml.dist"
     ],
 
     "compression": "NONE"
