@@ -2,5 +2,4 @@
 /composer.lock
 /config/*
 !/config/parameters.yaml.dist
-/bin/check_zabbix.phar
-/bin/check_zabbix
+/bin/nagios-zabbix-checker.phar

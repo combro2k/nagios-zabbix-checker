@@ -1,22 +1,23 @@
 {
-  "output": "bin/check_zabbix.phar",
+  "output": "bin/nagios-zabbix-checker.phar",
+  "git-commit-short": "git_commit_short",
 
-    "finder": [
-      {
-        "in": "vendor",
-        "exclude": ["Tests", "tests", "Test", "test"],
-        "name": "*.php"
-      },
-      {
-        "in": "src",
-        "name": "*.php"
-      }
-    ],
+  "finder": [
+    {
+      "in": "vendor",
+      "exclude": ["Tests", "tests", "Test", "test"],
+      "name": "*.php"
+    },
+    {
+      "in": "src",
+      "name": "*.php"
+    }
+  ],
 
-    "files": [
-      "vendor/composer/installed.json",
-      "config/parameters.yaml.dist"
-    ],
+  "files": [
+    "vendor/composer/installed.json",
+    "config/parameters.yaml.dist"
+  ],
 
-    "compression": "NONE"
+  "compression": "GZ"
 }

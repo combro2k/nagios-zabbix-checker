@@ -18,8 +18,8 @@ return [
     },
 
     Yaml::class => function (ServiceManager $serviceManager) {
-      $configFile = getenv("HOME") . '/.zabbix-triggers.yaml';
-      $altConfigFile = '/etc/zabbix-triggers.yaml';
+      $configFile = getenv("HOME") . '/.nagios-zabbix-checker.yaml';
+      $altConfigFile = '/etc/nagios-zabbix-checker.yaml';
 
       if (file_exists($configFile)) {
         return Yaml::parseFile($configFile);

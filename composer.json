@@ -1,5 +1,5 @@
 {
-  "name": "mma/zabbix-triggers",
+  "name": "combro2k/nagios-zabbix-checker",
 
   "require": {
     "zendframework/zend-servicemanager": "~3.4",
