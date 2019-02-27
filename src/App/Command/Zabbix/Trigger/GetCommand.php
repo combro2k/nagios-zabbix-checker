@@ -65,13 +65,13 @@ class GetCommand extends AbstractCommand
 
     $results = $client->request('trigger.get', $request);
 
-    $errors = [];
-    $exitCode = 0;
-
+    $exitCode = $rows = $err = 0;
     $out = '';
+
     foreach ($results as $result) {
+      $rows++;
       if ($result['value'] > 0) {
-        $errors[$result['triggerid']][] = $result;
+        $err++;
       }
 
       if ($input->getOption('triggerid') || $result['value'] > 0 || $input->getOption('verbose')) {
@@ -79,16 +79,20 @@ class GetCommand extends AbstractCommand
       }
     }
 
-    if (count($errors) >= $input->getOption('critical')) {
-      $out = "CRITICAL: {$out}";
+    if ($err >= $input->getOption('critical')) {
+      $out = "CRITICAL: ({$err}/{$rows}) | {$out}";
 
       $exitCode = 2;
-    } elseif (count($errors) >= $input->getOption('warning')) {
-      $out = "WARNING: {$out}";
+    } elseif ($err >= $input->getOption('warning')) {
+      $out = "WARNING: ({$err}/{$rows}) | {$out}";
 
       $exitCode = 1;
+    } elseif ($rows <= 0) {
+        $out = "UNKNOWN: no triggers found or host is wrong";
+
+        $exitCode = 3;
     } else {
-        $out = empty($out) ? "OK" : "OK: {$out}";
+        $out = empty($out) ? "OK" : "OK: ({$err}/{$rows}) | {$out}";
     }
 
     if (!empty($out)) {
