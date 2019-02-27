@@ -23,10 +23,11 @@ class GetCommand extends AbstractCommand
   {
     $this
       ->setName('trigger:get')
-      ->addArgument('host', InputArgument::REQUIRED, 'Host to check')
-      ->addOption('triggerid', 't', InputOption::VALUE_REQUIRED, 'Specify Trigger id', null)
+      ->addArgument('host', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'Host to check')
+      ->addOption('triggerid', 't', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Specify Trigger id(s)', null)
       ->addOption('warning', 'w', InputOption::VALUE_REQUIRED, 'Set warning threshold', 1)
       ->addOption('critical', 'c', InputOption::VALUE_REQUIRED, 'Set critical threshold', 2)
+      ->addOption('all', 'a', InputOption::VALUE_NONE, 'Show all triggers, disabled and enabled')
     ;
   }
 
@@ -51,33 +52,39 @@ class GetCommand extends AbstractCommand
       'filter' => [
         'triggerid' => $input->getOption('triggerid'),
         'host' => $input->getArgument('host'),
-        'status' => 0,
+        'status' => $input->getOption('all') ? null : 0,
         'value' => null,
       ]
     ]);
 
-    $errors = 0;
+    $errors = [];
     $exitCode = 0;
 
     $out = '';
     foreach ($hosts as $host) {
       if ($host['value'] > 0) {
-        $errors++;
+        $errors[$host['triggerid']][] = $host;
       }
 
-      $out .= "{$host['description']} - STATUS: {$host['value']}; ";
+      if ($input->getOption('verbose') || $host['value'] > 0) {
+        $out .= "{$host['description']} - STATUS: {$host['value']}; ";
+      }
     }
 
-    if ($errors >= $input->getOption('critical')) {
+    if (count($errors) >= $input->getOption('critical')) {
       $out = "CRITICAL: {$out}";
 
       $exitCode = 2;
-    } elseif ($errors >= $input->getOption('warning')) {
+    } elseif (count($errors) >= $input->getOption('warning')) {
       $out = "WARNING: {$out}";
 
       $exitCode = 1;
     } else {
-      $out = "OK: {$out}";
+        if ($input->getOption('triggerid')) {
+          $out = "";
+        }
+
+        $out = "OK: {$out}";
     }
 
     if (!empty($out)) {

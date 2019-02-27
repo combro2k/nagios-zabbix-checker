@@ -23,7 +23,7 @@ class ListCommand extends AbstractCommand
   {
     $this
       ->setName('trigger:list')
-      ->addArgument('host', InputArgument::REQUIRED, 'Host to check')
+      ->addArgument('host', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'Host to check')
       ->addOption('all', 'a', InputOption::VALUE_NONE, 'Show all triggers, disabled and enabled')
     ;
   }
