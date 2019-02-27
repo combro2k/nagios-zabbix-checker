@@ -4,7 +4,7 @@
 use \Zend\ServiceManager\ServiceManager;
 use \Symfony\Component\Console\Application;
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $application    = new Application('PHP-SMS');
 $serviceManager = new ServiceManager(require __DIR__ . '/../src/services.php');

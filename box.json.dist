@@ -1,0 +1,23 @@
+{
+  "output": "bin/check_zabbix.phar",
+
+    "finder": [
+      {
+        "in": "vendor",
+        "exclude": ["Tests", "tests", "Test", "test"],
+        "name": "*.php"
+      },
+      {
+        "in": "src",
+        "name": "*.php"
+      }
+    ],
+
+    "files": [
+      "vendor/composer/installed.json",
+      "config/parameters.yaml.dist",
+      "config/parameters.yaml"
+    ],
+
+    "compression": "NONE"
+}

@@ -45,29 +45,37 @@ class GetCommand extends AbstractCommand
       $this->getConfig('zabbix.password')
     );
 
-    $hosts = $client->request('trigger.get', [
+    $request = [
       'output' => 'extend',
       'expandDescription' => true,
       'expandComment' => true,
       'filter' => [
-        'triggerid' => $input->getOption('triggerid'),
         'host' => $input->getArgument('host'),
-        'status' => $input->getOption('all') ? null : 0,
-        'value' => null,
+        'status' => [0],
       ]
-    ]);
+    ];
+
+    if ($input->getOption('all')) {
+      $request['filter']['status'] = [0, 1];
+    }
+
+    if ($input->getOption('triggerid')) {
+      $request['filter']['triggerid'] = $input->getOption('triggerid');
+    }
+
+    $results = $client->request('trigger.get', $request);
 
     $errors = [];
     $exitCode = 0;
 
     $out = '';
-    foreach ($hosts as $host) {
-      if ($host['value'] > 0) {
-        $errors[$host['triggerid']][] = $host;
+    foreach ($results as $result) {
+      if ($result['value'] > 0) {
+        $errors[$result['triggerid']][] = $result;
       }
 
-      if ($input->getOption('verbose') || $host['value'] > 0) {
-        $out .= "{$host['description']} - STATUS: {$host['value']}; ";
+      if ($input->getOption('triggerid') || $result['value'] > 0 || $input->getOption('verbose')) {
+        $out .= "{$result['description']} - STATUS: {$result['value']} - Disabled: {$result['status']}; ";
       }
     }
 
@@ -80,11 +88,7 @@ class GetCommand extends AbstractCommand
 
       $exitCode = 1;
     } else {
-        if ($input->getOption('triggerid')) {
-          $out = "";
-        }
-
-        $out = "OK: {$out}";
+        $out = empty($out) ? "OK" : "OK: {$out}";
     }
 
     if (!empty($out)) {
