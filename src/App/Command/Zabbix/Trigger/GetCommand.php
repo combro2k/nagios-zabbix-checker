@@ -75,30 +75,41 @@ class GetCommand extends AbstractCommand
       }
 
       if ($input->getOption('triggerid') || $result['value'] > 0 || $input->getOption('verbose')) {
-        $out .= "{$result['description']} - STATUS: {$result['value']} - Disabled: {$result['status']}; ";
+        $out .= "{$result['description']} ({$result['value']}); ";
       }
     }
 
     if ($err >= $input->getOption('critical')) {
-      $out = "CRITICAL: ({$err}/{$rows}) | {$out}";
+      $out = "ZABBIX TRIGGER CRITICAL (limit={$err}/{$rows}) - {$out}";
 
       $exitCode = 2;
     } elseif ($err >= $input->getOption('warning')) {
-      $out = "WARNING: ({$err}/{$rows}) | {$out}";
+      $out = "ZABBIX TRIGGER WARNING (limit={$err}/{$rows}) - {$out}";
 
       $exitCode = 1;
     } elseif ($rows <= 0) {
-        $out = "UNKNOWN: no triggers found or host is wrong";
+        $out = "ZABBIX TRIGGER UNKNOWN - no triggers found or host is wrong";
 
         $exitCode = 3;
     } else {
-        $out = empty($out) ? "OK" : "OK: ({$err}/{$rows}) | {$out}";
+        $out = empty($out) ? "ZABBIX TRIGGER OK" : "ZABBIX TRIGGER OK - (limit={$err}/{$rows}) | {$out}";
     }
 
     if (!empty($out)) {
-      $output->writeln($out);
+      $output->writeln($this->truncate($out));
     }
 
     return (int) $exitCode;
   }
+
+  private function truncate($text, $length = 4000) {
+    if (strlen($text) > $length) {
+      $text = $text." ";
+      $text = substr($text, 0, $length);
+      $text = substr($text, 0, strrpos($text,' '));
+      $text = $text . "...";
+    }
+
+		return $text;
+	}
 }
