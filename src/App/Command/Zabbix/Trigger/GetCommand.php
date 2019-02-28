@@ -73,7 +73,8 @@ class GetCommand extends AbstractCommand
     }
 
     $results = $client->request('trigger.get', $request);
-    $exitCode = $rows = $err = $higestPriority = 0;
+    $exitCode = $rows = $err = 0;
+    $higestPriority = null;
     $out = '';
 
     foreach ($results as $result) {
@@ -99,11 +100,11 @@ class GetCommand extends AbstractCommand
         $out = "ZABBIX TRIGGER UNKNOWN - no triggers found or host is wrong";
 
         $exitCode = 3;
-    } elseif ($higestPriority >= 3 || $err >= $input->getOption('critical')) {
+    } elseif ($higestPriority != null && ($higestPriority >= 3 || $err >= $input->getOption('critical'))) {
       $out = "ZABBIX TRIGGER CRITICAL (limit={$err}/{$rows}) - {$out}";
 
       $exitCode = 2;
-    } elseif ($higestPriority > 0 || $err >= $input->getOption('warning')) {
+    } elseif ($higestPriority != null && ($higestPriority <= 2 || $err >= $input->getOption('warning'))) {
       $out = "ZABBIX TRIGGER WARNING (limit={$err}/{$rows}) - {$out}";
 
       $exitCode = 1;
