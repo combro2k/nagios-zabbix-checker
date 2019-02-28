@@ -83,11 +83,13 @@ class GetCommand extends AbstractCommand
       }
 
       if ($input->getOption('triggerid') || $result['value'] > 0 || $input->getOption('verbose')) {
-        $status = (int) $result['value'] === 0 ? 'OK' : $this->getSeverity($result['priority']);
+        $result['value'] = (int) $result['value'];
+        $status = $result['value'] === 0 ? 'OK' : $this->getSeverity($result['priority']);
 
         $out .= "{$result['description']} ({$status}); ";
 
-        if ($higestPriority < $result['priority']) {
+
+        if ($result['value'] > 0 &&  $higestPriority < $result['priority']) {
           $higestPriority = $result['priority'];
         }
       }
@@ -101,7 +103,7 @@ class GetCommand extends AbstractCommand
       $out = "ZABBIX TRIGGER CRITICAL (limit={$err}/{$rows}) - {$out}";
 
       $exitCode = 2;
-    } elseif ($higestPriority <= 2 || $err >= $input->getOption('warning')) {
+    } elseif ($higestPriority > 0 || $err >= $input->getOption('warning')) {
       $out = "ZABBIX TRIGGER WARNING (limit={$err}/{$rows}) - {$out}";
 
       $exitCode = 1;
