@@ -16,6 +16,16 @@ use kamermans\ZabbixClient\ZabbixClient;
  */
 class GetCommand extends AbstractCommand
 {
+  
+  protected $severityMap = [
+    0 => 'Not classified',
+    1 => 'Information',
+    2 => 'Warning',
+    3 => 'Average',
+    4 => 'High',
+    5 => 'Disaster',
+  ];
+
   /**
    * @return void
    */
@@ -25,8 +35,8 @@ class GetCommand extends AbstractCommand
       ->setName('trigger:get')
       ->addArgument('host', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'Host to check')
       ->addOption('triggerid', 't', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Specify Trigger id(s)', null)
-      ->addOption('warning', 'w', InputOption::VALUE_REQUIRED, 'Set warning threshold', 1)
-      ->addOption('critical', 'c', InputOption::VALUE_REQUIRED, 'Set critical threshold', 2)
+      ->addOption('warning', 'w', InputOption::VALUE_REQUIRED, 'Set warning threshold', 2)
+      ->addOption('critical', 'c', InputOption::VALUE_REQUIRED, 'Set critical threshold', 4)
       ->addOption('all', 'a', InputOption::VALUE_NONE, 'Show all triggers, disabled and enabled')
     ;
   }
@@ -58,14 +68,12 @@ class GetCommand extends AbstractCommand
     if ($input->getOption('all')) {
       $request['filter']['status'] = [0, 1];
     }
-
     if ($input->getOption('triggerid')) {
       $request['filter']['triggerid'] = $input->getOption('triggerid');
     }
 
     $results = $client->request('trigger.get', $request);
-
-    $exitCode = $rows = $err = 0;
+    $exitCode = $rows = $err = $higestPriority = 0;
     $out = '';
 
     foreach ($results as $result) {
@@ -75,22 +83,28 @@ class GetCommand extends AbstractCommand
       }
 
       if ($input->getOption('triggerid') || $result['value'] > 0 || $input->getOption('verbose')) {
-        $out .= "{$result['description']} ({$result['value']}); ";
+        $status = (int) $result['value'] === 0 ? 'OK' : $this->getSeverity($result['priority']);
+
+        $out .= "{$result['description']} ({$status}); ";
+
+        if ($higestPriority < $result['priority']) {
+          $higestPriority = $result['priority'];
+        }
       }
     }
-
-    if ($err >= $input->getOption('critical')) {
-      $out = "ZABBIX TRIGGER CRITICAL (limit={$err}/{$rows}) - {$out}";
-
-      $exitCode = 2;
-    } elseif ($err >= $input->getOption('warning')) {
-      $out = "ZABBIX TRIGGER WARNING (limit={$err}/{$rows}) - {$out}";
-
-      $exitCode = 1;
-    } elseif ($rows <= 0) {
+    
+    if ($rows <= 0) {
         $out = "ZABBIX TRIGGER UNKNOWN - no triggers found or host is wrong";
 
         $exitCode = 3;
+    } elseif ($higestPriority >= 3 || $err >= $input->getOption('critical')) {
+      $out = "ZABBIX TRIGGER CRITICAL (limit={$err}/{$rows}) - {$out}";
+
+      $exitCode = 2;
+    } elseif ($higestPriority <= 2 || $err >= $input->getOption('warning')) {
+      $out = "ZABBIX TRIGGER WARNING (limit={$err}/{$rows}) - {$out}";
+
+      $exitCode = 1;
     } else {
         $out = empty($out) ? "ZABBIX TRIGGER OK" : "ZABBIX TRIGGER OK - (limit={$err}/{$rows}) | {$out}";
     }
@@ -102,7 +116,11 @@ class GetCommand extends AbstractCommand
     return (int) $exitCode;
   }
 
-  private function truncate($text, $length = 4000) {
+  protected function getSeverity($id = 0) {
+    return array_key_exists($id, $this->severityMap) ? $this->severityMap[$id] : 'Not classified';
+  }
+
+  protected function truncate($text, $length = 4000) {
     if (strlen($text) > $length) {
       $text = $text." ";
       $text = substr($text, 0, $length);
