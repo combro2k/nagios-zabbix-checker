@@ -109,7 +109,7 @@ class GetCommand extends AbstractCommand
 
       $exitCode = 1;
     } else {
-        $out = empty($out) ? "ZABBIX TRIGGER OK" : "ZABBIX TRIGGER OK - (limit={$err}/{$rows}) | {$out}";
+        $out = empty($out) ? "ZABBIX TRIGGER OK" : "ZABBIX TRIGGER OK - (limit={$err}/{$rows}) - {$out}";
     }
 
     if (!empty($out)) {
